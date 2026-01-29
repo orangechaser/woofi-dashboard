@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 # 页面配置
 st.set_page_config(page_title="WOOFi Business Dashboard", layout="wide")
-st.title("📊 WOOFi weekly dashboard")
+st.title("📊 WOOFi 业务周报数据看板")
 
 try:
     # 1. 链接数据库
@@ -31,8 +31,8 @@ try:
         latest = data.iloc[-1]
         m1, m2, m3, m4 = st.columns(4)
         
-        m1.metric("Last week (Swap)", f"${latest['swap_vol']:,.0f}")
-        m2.metric("Last week (Pro)", f"${latest['pro_vol']:,.0f}")
+        m1.metric("Last week (Swap Vol)", f"${latest['swap_vol']:,.0f}")
+        m2.metric("Last week (Pro Vol)", f"${latest['pro_vol']:,.0f}")
         
         latest_total_rev = latest['swap_rev'] + latest['pro_rev'] + latest['kronos_rev']
         m3.metric("Total Revenue", f"${latest_total_rev:,.0f}")
@@ -41,58 +41,68 @@ try:
         st.divider()
 
         # 4. 图表区域：左右分栏
-        st.subheader("📈 业务趋势分析")
+        st.subheader("📈 业务趋势细分")
         col_left, col_right = st.columns(2)
 
         # --- 左侧：Volume 趋势图 ---
         with col_left:
             fig_vol = go.Figure()
+            # Swap Volume
             fig_vol.add_trace(go.Scatter(
-                x=data['date_range'], 
-                y=data['swap_vol'],
-                name='Swap Vol',
-                mode='lines+markers',
+                x=data['date_range'], y=data['swap_vol'],
+                name='Swap Vol', mode='lines+markers',
                 line=dict(width=3, color='#00FFA3'),
-                hovertemplate="Total Swap: $%{y:,.0f}<extra></extra>"
+                hovertemplate="Swap Vol: $%{y:,.0f}<extra></extra>"
             ))
+            # Pro Volume
             fig_vol.add_trace(go.Scatter(
-                x=data['date_range'], 
-                y=data['pro_vol'],
-                name='Pro Vol',
-                mode='lines+markers',
+                x=data['date_range'], y=data['pro_vol'],
+                name='Pro Vol', mode='lines+markers',
                 line=dict(width=3, color='#00E0FF'),
-                hovertemplate="Total Pro: $%{y:,.0f}<extra></extra>"
+                hovertemplate="Pro Vol: $%{y:,.0f}<extra></extra>"
             ))
             fig_vol.update_layout(
                 title="Weekly Volume ($)",
                 hovermode="x unified",
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 margin=dict(l=0, r=0, t=50, b=0),
-                height=400,
+                height=450,
                 xaxis=dict(showgrid=False),
                 yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)')
             )
             st.plotly_chart(fig_vol, use_container_width=True)
 
-        # --- 右侧：Revenue 趋势图 ---
+        # --- 右侧：Revenue 细分趋势图 ---
         with col_right:
-            data['total_revenue'] = data['swap_rev'] + data['pro_rev'] + data['kronos_rev']
-            
             fig_rev = go.Figure()
+            # Swap Revenue
             fig_rev.add_trace(go.Scatter(
-                x=data['date_range'], 
-                y=data['total_revenue'],
-                name='Total Revenue',
-                mode='lines+markers',
-                line=dict(width=3, color='#FF4B4B'),
-                hovertemplate="Total Rev: $%{y:,.0f}<extra></extra>"
+                x=data['date_range'], y=data['swap_rev'],
+                name='Swap Rev', mode='lines+markers',
+                line=dict(width=2, color='#FF4B4B'),
+                hovertemplate="Swap Rev: $%{y:,.0f}<extra></extra>"
             ))
+            # Pro Revenue
+            fig_rev.add_trace(go.Scatter(
+                x=data['date_range'], y=data['pro_rev'],
+                name='Pro Rev', mode='lines+markers',
+                line=dict(width=2, color='#FFAA00'),
+                hovertemplate="Pro Rev: $%{y:,.0f}<extra></extra>"
+            ))
+            # Kronos Revenue
+            fig_rev.add_trace(go.Scatter(
+                x=data['date_range'], y=data['kronos_rev'],
+                name='Kronos Rev', mode='lines+markers',
+                line=dict(width=2, color='#AA00FF', dash='dot'),
+                hovertemplate="Kronos Rev: $%{y:,.0f}<extra></extra>"
+            ))
+            
             fig_rev.update_layout(
-                title="Weekly Total Revenue ($)",
+                title="Weekly Revenue Breakdown ($)",
                 hovermode="x unified",
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 margin=dict(l=0, r=0, t=50, b=0),
-                height=400,
+                height=450,
                 xaxis=dict(showgrid=False),
                 yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)')
             )
