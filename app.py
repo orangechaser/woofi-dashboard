@@ -3,17 +3,17 @@ from supabase import create_client
 import pandas as pd
 import plotly.graph_objects as go
 
-# Page Configuration
+# 1. Page Configuration
 st.set_page_config(page_title="WOOFi Business Dashboard", layout="wide")
 st.title("📊 WOOFi Weekly Business Dashboard")
 
 try:
-    # 1. Database Connection
+    # 2. Database Connection
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
     supabase = create_client(url, key)
 
-    # 2. Fetch Data
+    # 3. Fetch Data
     response = supabase.table("weekly_reports").select("*").execute()
     data = pd.DataFrame(response.data)
 
@@ -22,12 +22,12 @@ try:
         data['created_at'] = pd.to_datetime(data['created_at'])
         data = data.sort_values('created_at')
         
-        # Force numeric conversion
+        # Force numeric conversion for plotting and metrics
         num_cols = ['swap_vol', 'pro_vol', 'swap_rev', 'pro_rev', 'kronos_rev', 'rank']
         for col in num_cols:
             data[col] = pd.to_numeric(data[col], errors='coerce').fillna(0)
 
-        # 3. Top Metrics Cards
+        # 4. Top Metrics Cards
         latest = data.iloc[-1]
         m1, m2, m3, m4 = st.columns(4)
         
@@ -40,7 +40,7 @@ try:
 
         st.divider()
 
-        # 4. Charts: Row 1 (Volume and Revenue)
+        # 5. Charts Row 1: Volume and Revenue Breakdown
         st.subheader("📈 Business Growth Trends")
         col_left, col_right = st.columns(2)
 
@@ -89,4 +89,9 @@ try:
                 x=data['date_range'], y=data['kronos_rev'],
                 name='Kronos Rev', mode='lines+markers',
                 line=dict(width=2, color='#AA00FF', dash='dot'),
-                hovertemplate="Kronos Rev:
+                hovertemplate="Kronos Rev: $%{y:,.0f}<extra></extra>"
+            ))
+            fig_rev.update_layout(
+                title="Weekly Revenue Breakdown ($)",
+                hovermode="x unified",
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
