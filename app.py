@@ -34,7 +34,7 @@ try:
         m1.metric("Last Week Swap Vol", f"${last['swap_vol']:,.0f}")
         m2.metric("Last Week Pro Vol", f"${last['pro_vol']:,.0f}")
         total_rev = last['swap_rev'] + last['pro_rev'] + last['kronos_rev']
-        m3.metric("Last Week Revenue", f"${total_rev:,.0f}")
+        m3.metric("Last Week Revenue(woofi+kronos)", f"${total_rev:,.0f}")
         m4.metric("Current Rank", f"#{int(last['rank'])}")
 
         st.divider()
